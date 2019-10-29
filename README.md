@@ -12,3 +12,9 @@ Jacob is in charge of creative design for the project and developing the possibl
 Colton is in charge of creating the spells and their effects, as well as developing the different map pieces that can be procedurally generated.
 
 Aaron is in charge of the voice controls and having them cause the spells to occur, as well as have the spells be randomized upon each playthrough.
+
+## Definitions
+- Map: A floor of the dungeon, where there are a number of rooms that lead from start to a boss for each map.
+- Room Tile: A specific tile in the meta part of the map; there are a series of room tiles that lead from start to end with a few dead end branching paths. These will be of size 10mx10m.
+- Cubby: A shorthand reference for a room that may exist within a room tile.
+- Tiny Tile: A tile within a room tile that will make up the construct of this room. These will be 2mx2m in size.
