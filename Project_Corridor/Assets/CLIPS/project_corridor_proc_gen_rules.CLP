@@ -34,12 +34,16 @@
 	(slot z_max (type NUMBER) (default 999))
 	(slot assembled (default FALSE)))
 
+(deftemplate verify-coords
+	(slot x (type NUMBER) (default 999))
+	(slot z (type NUMBER) (default 999))
+)
+
 (deftemplate params (slot min_dist (type NUMBER) (default 1)))
 
 (deftemplate db-status (slot valid))
 (deftemplate assembly-result (slot successful))
-
-
+(deftemplate cut-tile (slot id))
 
 
 ;; Initial check for adequate tiles
@@ -61,7 +65,7 @@
 
 
 
-;; TODO: Break large tiles into manageable pieces
+;; Break large tiles into manageable pieces
 
 (defrule break-two-by-one
 (declare (salience 20))
@@ -105,6 +109,29 @@
 
 ;; TODO: make goal 3x3
 
+;; TODO: cut tile
+
+
+;; verify no overlaps
+(defrule verify-no-overlap
+(declare (salience 15))
+?vc <- (verify-coords (x ?x) (z ?z))
+?c_tile <- (tile (id ?t-id) (x ?x) (z ?z))
+(not (tile (id ~?t-id) (x ?x) (z ?z)))
+=>
+(retract ?vc)
+)
+
+;;todo: circular
+(defrule fix-overlap
+(declare (salience 15))
+?vc <- (verify-coords (x ?x) (z ?z))
+?c_tile <- (tile (id ?t-id) (x ?x) (z ?z))
+(tile (id ~?t-id) (x ?x) (z ?z))
+=>
+(modify ?c_tile (x 999) (z 999) (assembled FALSE) (N-tile nil) (E-tile nil) (S-tile nil) (W-tile nil))
+(retract ?vc)
+)
 
 
 
@@ -162,11 +189,11 @@
 ?south-tile <- (tile (id ?s-id) (N-wall OPEN) (assembled FALSE))
 ?north-tile <- (tile (id ?n-id) (S-wall OPEN) (S-tile nil) (assembled TRUE) (dist ?d) (x ?x) (z ?z))
 (or (tile (id ?s-id&~GOAL)) (test (>= ?d ?m_dist)))
-;; TODO: do not insert tiles on top of each other
-;; (not (tile (id ~?n-id) (assembled TRUE) (x ?x) (z (- ?z 1))) )
+(not (tile (id ~?s-id) (x ?x) (z =(- ?z 1))))
 =>
 (modify ?north-tile (S-tile ?s-id))
 (modify ?south-tile (N-tile ?n-id) (assembled TRUE) (dist (+ ?d 1)) (x ?x) (z (- ?z 1)))
+(assert (verify-coords (x ?x) (z (- ?z 1))))
 ) 
 
 ;; Attach tile with N opening to assembly with S opening
@@ -177,9 +204,11 @@
 ?south-tile <- (tile (id ?s-id) (N-wall OPEN) (N-tile nil) (assembled TRUE) (dist ?d) (x ?x) (z ?z))
 ?north-tile <- (tile (id ?n-id) (S-wall OPEN) (S-tile nil) (assembled FALSE))
 (or (tile (id ?n-id&~GOAL&~"GOAL_NW"&~"GOAL_NE"&~"GOAL_SE"&~"GOAL_SW")) (test (> ?d ?m_dist)))
+(not (tile (id ~?n-id) (x ?x) (z =(+ ?z 1))))
 =>
 (modify ?north-tile (S-tile ?s-id) (assembled TRUE) (dist (+ ?d 1)) (x ?x) (z (+ ?z 1)))
 (modify ?south-tile (N-tile ?n-id))
+(assert (verify-coords (x ?x) (z (+ ?z 1))))
 )
 
 ;; Attach tile with W opening to assembly with E opening
@@ -190,9 +219,11 @@
 ?east-tile <- (tile (id ?e-id) (W-wall OPEN) (W-tile nil) (assembled TRUE) (dist ?d) (x ?x) (z ?z))
 ?west-tile <- (tile (id ?w-id) (E-wall OPEN) (E-tile nil) (assembled FALSE))
 (or (tile (id ?w-id&~GOAL)) (test (> ?d ?m_dist)))
+(not (tile (id ~?w-id) (x =(- ?x 1)) (z ?z)))
 =>
 (modify ?east-tile (W-tile ?w-id))
 (modify ?west-tile (E-tile ?e-id) (assembled TRUE) (dist (+ ?d 1)) (x (- ?x 1)) (z ?z))
+(assert (verify-coords (x (- ?x 1)) (z ?z)))
 )
 
 ;; Attach tile with W opening to assembly with E opening
@@ -203,25 +234,54 @@
 ?east-tile <- (tile (id ?e-id) (W-wall OPEN) (W-tile nil) (assembled FALSE))
 ?west-tile <- (tile (id ?w-id) (E-wall OPEN) (E-tile nil) (assembled TRUE) (x ?x) (z ?z) (dist ?d))
 (or (tile (id ?e-id&~GOAL)) (test (> ?d ?m_dist)))
+(not (tile (id ~?e-id) (x =(+ ?x 1)) (z ?z)))
 =>
 (modify ?west-tile (E-tile ?e-id))
 (modify ?east-tile (W-tile ?w-id) (assembled TRUE) (dist (+ ?d 1)) (x (+ ?x 1)) (z ?z))
+(assert (verify-coords (x (+ ?x 1)) (z ?z)))
 )
 
 
-;; If 
+;; FIXME: flag tiles occupying same space
+(defrule print-overlap
+(declare (salience 10))
+(tile (id ?t1) (x ?x&~999) (z ?z&~999))
+(tile (id ?t2&~?t1) (x ?x) (z ?z))
+=>
+(printout t ?t1 " and " ?t2 " occupy " ?x " " ?z crlf)
+)
+
+
+
+;; TODO: reevaluate distances via adjacencies
+
 
 
 
 ;; Validate that map assembly successfully connected start and goal tiles
-;; FIXME: cannot unify after goal is initially added
 (defrule validate-assembly
 (declare (salience 1))
-(tile (id GOAL) (assembled ?a))
+(tile (id GOAL) (assembled TRUE))
 (tile (id ?id1) (x ?x) (z ?z))
 (not (tile (id ?id2&~?id1) (x ?x) (z ?z)))
 =>
-(assert (assembly-result (successful ?a)))
+(assert (assembly-result (successful TRUE)))
+)
+
+(defrule invalidate-assembly
+(declare (salience 1))
+(tile (id ?id1) (x ?x) (z ?z))
+(or (tile (id GOAL) (assembled FALSE)) (not (tile (id ?id2&~id1) (x ?x) (z ?z))))
+=>
+(assert (assembly-result (successful FALSE)))
+)
+
+(defrule modify-assembly
+(declare (salience 1))
+?f <- (assembly-result (successful FALSE))
+(assembly-result (successful TRUE))
+=>
+(retract ?f)
 )
 
 
@@ -236,6 +296,21 @@
 (test (< ?r 4))
 =>
 (modify ?target (N-wall ?w) (E-wall ?n) (S-wall ?e) (W-wall ?s) (num_rots (+ ?r 1)))
+)
+
+
+;; TODO try detaching tiles and rotating if map has not been successfully assembled
+(defrule detach-and-rotate-tile
+(declare (salience -11))
+(assembly-result (successful FALSE))
+?target <- (tile (id ?t-id) (assembled TRUE) (N-wall ?n) (E-wall ?e) (S-wall ?s) (W-wall ?w) (dist ?d) (num_rots ?r))
+?other_rot <- (tile (assembled FALSE) (num_rots ?r_1))
+(not (exists (tile (dist =(+ ?d 1)))))
+(test (< ?r 4))
+=>
+(modify ?target (assembled FALSE) (dist 999) (N-wall ?w) (E-wall ?n) (S-wall ?e) (W-wall ?s) (num_rots (+ ?r 1)))
+(modify ?other_rot (num_rots 0))
+(assert (cut-tile (id ?t-id)))
 )
 
 
@@ -332,14 +407,11 @@
 ;; Pass in ordered list of tiles
 
 (deffacts startup
-(params (min_dist 3))
+(params (min_dist 2))
 (tile (id START) (type room) (ht 1) (wid 1) (N-wall CLOSED) (S-wall OPEN) (E-wall CLOSED) (W-wall CLOSED))
-(tile (id BIGROOM) (type room) (ht 2) (wid 2) (N-wall OPEN) (S-wall CLOSED) (E-wall OPEN) (W-wall OPEN))
-(tile (id W-TILE) (type room) (ht 1) (wid 1) (N-wall CLOSED) (S-wall CLOSED) (E-wall OPEN) (W-wall CLOSED))
-(tile (id NESW-TILE) (type room) (ht 1) (wid 1) (N-wall OPEN) (S-wall OPEN) (E-wall OPEN) (W-wall OPEN))
 (tile (id GOAL) (type room) (ht 1) (wid 1) (N-wall CLOSED) (S-wall CLOSED) (E-wall CLOSED) (W-wall OPEN))
-(tile (id LONGROOM) (type room) (ht 1) (wid 2) (N-wall CLOSED) (S-wall CLOSED) (E-wall OPEN) (W-wall OPEN))
-(tile (id TALLROOM) (type room) (ht 2) (wid 1) (N-wall OPEN) (S-wall CLOSED) (E-wall CLOSED) (W-wall OPEN))
-(tile (id NS-TILE) (type room) (ht 1) (wid 1) (N-wall OPEN) (S-wall OPEN) (E-wall CLOSED) (W-wall CLOSED))
+(tile (id 0110) (type room) (ht 1) (wid 1) (N-wall OPEN) (S-wall CLOSED) (E-wall CLOSED) (W-wall OPEN))
+(tile (id 1001) (type room) (ht 1) (wid 1) (N-wall CLOSED) (S-wall OPEN) (E-wall OPEN) (W-wall CLOSED))
+(tile (id 0111) (type room) (ht 1) (wid 1) (N-wall OPEN) (S-wall CLOSED) (E-wall CLOSED) (W-wall CLOSED))
 )
 
