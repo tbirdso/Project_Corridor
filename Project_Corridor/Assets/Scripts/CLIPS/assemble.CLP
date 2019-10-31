@@ -5,19 +5,19 @@
 
 ;; Templates
 (deftemplate tile 
-	(slot id)
+	(slot id )
 	(slot type (default room))
 	(slot ht (type NUMBER) (default 1))
 	(slot wid (type NUMBER) (default 1))
-	(slot room-id (default nil))
 	(slot N-tile (default nil))
+	(slot S-tile (default nil))
 	(slot E-tile (default nil))
 	(slot W-tile (default nil))
-	(slot S-tile (default nil))
 	(slot N-wall (default CLOSED))
+	(slot S-wall (default CLOSED))
 	(slot E-wall (default CLOSED))
 	(slot W-wall (default CLOSED))
-	(slot S-wall (default CLOSED))
+	(slot room-id (default nil))
 	(slot x (type NUMBER) (default 999))
 	(slot z (type NUMBER) (default 999))
 	(slot dist (type NUMBER))
@@ -35,18 +35,91 @@
 	(slot z_max (type NUMBER) (default 999))
 	(slot assembled (default FALSE)))
 
-(deftemplate verify-coords
-	(slot x (type NUMBER) (default 999))
-	(slot z (type NUMBER) (default 999))
-)
-
 (deftemplate params (slot min_dist (type NUMBER) (default 1)))
+
+(deftemplate input-file (slot src (type STRING) (default "C:/")))
+(deftemplate output-file (slot dst (type STRING) (default "C:/")))
 
 (deftemplate db-status (slot valid))
 (deftemplate assembly-result (slot successful))
 (deftemplate cut-tile (slot id))
-(deftemplate counter (slot num))
+(deftemplate f-ptr (slot name) (slot mode) (slot active (default TRUE)))
+(deftemplate last-read (slot data))
 
+;; READ DB: Read in tile database from common file
+
+
+(defrule init-src
+(declare (salience 99))
+(not (input-file))
+=>
+(assert (input-file))
+)
+
+(defrule init-dst
+(declare (salience 99))
+(not (output-file))
+=>
+(assert (output-file))
+)
+
+(defrule init-f-reader
+(declare (salience 99))
+(input-file (src ?src))
+(not (f-ptr))
+=>
+(open ?src readFile "r")
+(assert (f-ptr (name readFile) (mode r)))
+)
+
+(defrule read-params
+(declare (salience 95))
+(f-ptr (name ?f) (mode r))
+(not (params))
+?l <- (last-read (data params))
+=>
+(printout t "Load params" crlf)
+(assert (params (min_dist (read ?f))))
+(retract ?l)
+)
+
+(defrule read-tiles
+(declare (salience 95))
+(f-ptr (name ?f) (mode r))
+?l <- (last-read (data ?d&tile))
+=>
+(printout t "Load " ?d crlf)
+(assert (tile (id (read ?f)) (type (read ?f)) (ht (read ?f)) (wid (read ?f)) (N-wall (read ?f)) (S-wall (read ?f)) (E-wall (read ?f)) (W-wall (read ?f))))
+(retract ?l)
+)
+
+(defrule read-eof
+(declare (salience 95))
+?file <- (f-ptr (name ?f) (mode r))
+?l <- (last-read (data EOF))
+=>
+(printout t "Close " ?f crlf)
+(close ?f)
+(modify ?file (active FALSE))
+(retract ?l)
+)
+
+
+(defrule read-one
+(declare (salience 94))
+(f-ptr (name ?f) (mode r) (active TRUE))
+(or (not (last-read)) (last-read (data ~params&~tile&~EOF)))
+=>
+(assert (last-read (data (read ?f))))
+)
+
+(defrule close-file
+(declare (salience 93))
+(f-ptr (name ?f) (mode r) (active TRUE))
+=>
+(close ?f)
+(modify ?f (active FALSE))
+)
 
 ;; VALIDATE DB: Initial check for whether tile database
 ;; could yield a valid map
@@ -54,6 +127,7 @@
 (defrule validate-init-db
 (declare (salience 90))
 (and (tile (id START)) (tile (id GOAL)))
+(not (assembly-result))
 =>
 (assert (db-status (valid TRUE)))
 )
@@ -110,8 +184,17 @@
 )
 
 
-;; BACKJUMP: Greedy placement tries to place all tiles and then checks validity of resulting map.
+;; BACKTRACK: Greedy placement tries to place all tiles and then checks validity of resulting map.
 ;; If map is invalid, remove and reorganize the fewest tiles possible to yield a valid map.
+
+;; Reset all rotations from the previous state to be retried
+(defrule reset-rotations
+(declare (salience 31))
+(cut-tile (id ?t-id))
+?r-tile <- (tile (id ~?t-id) (num_rots 4))
+=>
+(modify ?r-tile (num_rots 0))
+)
 
 (defrule remove-N-ref
 (declare (salience 30))
@@ -159,6 +242,7 @@
 ;; Arbitrarily remove tiles occupying same space
 (defrule print-overlap
 (declare (salience 20))
+(not (assembly-result (successful TRUE)))
 ?t_new <- (tile (id ?t1) (x ?x&~999) (z ?z&~999))
 (tile (id ?t2&~?t1) (x ?x) (z ?z))
 =>
@@ -251,13 +335,13 @@
 ?start-tile <- (tile (id START) (assembled FALSE))
 =>
 (modify ?start-tile (assembled TRUE) (dist 0) (x 0) (z 0))
-(assert (counter (num 0)))
 )
 
 ;; Attach tile with S opening to assembly with N opening
 (defrule attach-S-to-N
 (declare (salience 0))
 (exists (db-status (valid TRUE)))
+(not (assembly-result (successful TRUE)))
 (params (min_dist ?m_dist))
 ?south-tile <- (tile (id ?s-id) (N-wall OPEN) (assembled FALSE))
 ?north-tile <- (tile (id ?n-id) (S-wall OPEN) (S-tile nil) (assembled TRUE) (dist ?d) (x ?x) (z ?z))
@@ -272,6 +356,7 @@
 (defrule attach-N-to-S
 (declare (salience 0))
 (exists (db-status (valid TRUE)))
+(not (assembly-result (successful TRUE)))
 (params (min_dist ?m_dist))
 ?south-tile <- (tile (id ?s-id) (N-wall OPEN) (N-tile nil) (assembled TRUE) (dist ?d) (x ?x) (z ?z))
 ?north-tile <- (tile (id ?n-id) (S-wall OPEN) (S-tile nil) (assembled FALSE))
@@ -286,6 +371,7 @@
 (defrule attach-W-to-E
 (declare (salience 0))
 (exists (db-status (valid TRUE)))
+(not (assembly-result (successful TRUE)))
 (params (min_dist ?m_dist))
 ?east-tile <- (tile (id ?e-id) (W-wall OPEN) (W-tile nil) (assembled TRUE) (dist ?d) (x ?x) (z ?z))
 ?west-tile <- (tile (id ?w-id) (E-wall OPEN) (E-tile nil) (assembled FALSE))
@@ -300,6 +386,7 @@
 (defrule attach-E-to-W
 (declare (salience 0))
 (exists (db-status (valid TRUE)))
+(not (assembly-result (successful TRUE)))
 (params (min_dist ?m_dist))
 ?east-tile <- (tile (id ?e-id) (W-wall OPEN) (W-tile nil) (assembled FALSE))
 ?west-tile <- (tile (id ?w-id) (E-wall OPEN) (E-tile nil) (assembled TRUE) (x ?x) (z ?z) (dist ?d))
@@ -317,7 +404,6 @@
 
 (defrule rotate-tile
 (declare (salience -10))
-(assembly-result (successful FALSE))
 ?target <- (tile (assembled FALSE) (N-wall ?n) (E-wall ?e) (S-wall ?s) (W-wall ?w) (N-tile nil) (E-tile nil) (S-tile nil) (W-tile nil) (num_rots ?r))
 (test (< ?r 4))
 =>
@@ -326,13 +412,13 @@
 
 
 ;; DETACH AND ROTATE: If the map could not be successfully assembled, detach and rotate a single tile
-;; to initiate backjumping and also reset the rotations of unused tiles
+;; to initiate backtracking and also reset the rotations of unused tiles
 
 (defrule detach-and-rotate-tile
 (declare (salience -20))
 (assembly-result (successful FALSE))
-?target <- (tile (id ?t-id) (assembled TRUE) (N-wall ?n) (E-wall ?e) (S-wall ?s) (W-wall ?w) (dist ?d) (num_rots ?r))
-?other_rot <- (tile (assembled FALSE) (num_rots ?r_1))
+?target <- (tile (id ?t-id&~START&~GOAL) (assembled TRUE) (N-wall ?n) (E-wall ?e) (S-wall ?s) (W-wall ?w) (dist ?d) (num_rots ?r))
+?other_rot <- (tile (id ~START&~GOAL) (assembled FALSE) (num_rots ?r_1))
 (not (exists (tile (dist =(+ ?d 1)))))
 (test (< ?r 4))
 =>
@@ -363,8 +449,8 @@
 
 (defrule modify-assembly
 (declare (salience -30))
-?f <- (assembly-result (successful FALSE))
 (assembly-result (successful TRUE))
+?f <- (assembly-result (successful FALSE))
 =>
 (retract ?f)
 )
@@ -490,6 +576,7 @@
 ;; POSTPROCESS: Regroup multitiles for inclusion in the database
 (defrule find-two-by-one
 (declare (salience -80))
+(assembly-result (successful TRUE))
 ?multitile <- (multitile (id ?m-id) (ht 2) (wid 1) (x_min 999))
 (tile (id ?t-id) (assembled TRUE) (x ?x) (z ?z))
 (test (eq (str-compare (str-cat ?m-id "_NORTH") ?t-id) 0))
@@ -499,6 +586,7 @@
 
 (defrule find-one-by-two
 (declare (salience -80))
+(assembly-result (successful TRUE))
 ?multitile <- (multitile (id ?m-id) (ht 1) (wid 2) (x_min 999))
 (tile (id ?t-id) (assembled TRUE) (x ?x) (z ?z))
 (test (eq (str-compare (str-cat ?m-id "_EAST") ?t-id) 0))
@@ -508,6 +596,7 @@
 
 (defrule find-two-by-two
 (declare (salience -80))
+(assembly-result (successful TRUE))
 ?multitile <- (multitile (id ?m-id) (ht 2) (wid 2) (x_min 999))
 (tile (id ?t-id) (assembled TRUE) (x ?x) (z ?z))
 (test (eq (str-compare (str-cat ?m-id "_NE") ?t-id) 0))
@@ -515,19 +604,41 @@
 (modify ?multitile (x_min (- ?x 1)) (x_max ?x) (z_min (- ?z 1)) (z_max ?z))
 )
 
-;; Pass in ordered list of tiles
 
-(deffacts startup
-(params (min_dist 2))
-(tile (id START) (type room) (ht 1) (wid 1) (N-wall OPEN) (S-wall CLOSED) (E-wall CLOSED) (W-wall CLOSED))
-(tile (id GOAL) (type room) (ht 1) (wid 1) (N-wall CLOSED) (S-wall CLOSED) (E-wall CLOSED) (W-wall OPEN))
-(tile (id NSE) (type room) (ht 1) (wid 1) (N-wall OPEN) (S-wall OPEN) (E-wall OPEN) (W-wall CLOSED))
-(tile (id NEW) (type room) (ht 1) (wid 1) (N-wall OPEN) (S-wall CLOSED) (E-wall OPEN) (W-wall OPEN))
-(tile (id NSE-2) (type room) (ht 1) (wid 1) (N-wall OPEN) (S-wall OPEN) (E-wall OPEN) (W-wall CLOSED))
-(tile (id NS) (type room) (ht 1) (wid 1) (N-wall OPEN) (S-wall OPEN) (E-wall CLOSED) (W-wall CLOSED))
-(tile (id EW) (type room) (ht 1) (wid 1) (N-wall CLOSED) (S-wall CLOSED) (E-wall OPEN) (W-wall OPEN))
-(tile (id long) (ht 1) (wid 2) (N-wall CLOSED) (S-wall OPEN) (E-wall OPEN) (W-wall OPEN))
-(tile (id tall) (ht 2) (wid 1) (N-wall OPEN) (S-wall OPEN) (E-wall OPEN) (W-wall OPEN))
-(tile (id big) (ht 2) (wid 2) (N-wall OPEN) (S-wall CLOSED) (E-wall CLOSED) (W-wall CLOSED))
+;; WRITE DB: Send tiles and multitiles to a file to be read into Unity3D
+
+(defrule init-f-writer
+(declare (salience -90))
+(assembly-result (successful TRUE))
+(output-file (dst ?dst))
+(not (f-writer))
+=>
+(open ?dst writeFile "w")
+(assert (f-ptr (name writeFile) (mode w)))
 )
 
+(defrule write-tile
+(declare (salience -90))
+(f-ptr (name ?writer) (mode w) (active TRUE))
+?t <- (tile (id ?id) (x ?x) (z ?z) (num_rots ?r) (N-tile ?n) (S-tile ?s) (E-tile ?e) (W-tile ?w) (assembled TRUE))
+=>
+(printout t "Writing tile " ?id crlf)
+(printout ?writer "tile," ?id "," ?x "," ?z "," ?r "," ?n "," ?s "," ?e "," ?w crlf)
+)
+
+(defrule write-multitile
+(declare (salience -90))
+(f-ptr (name ?writer) (mode w) (active TRUE))
+?t <- (multitile (id ?id) (x_min ?xmin) (x_max ?xmax) (z_min ?zmin) (z_max ?zmax))
+=>
+(printout t "Writing multitile " ?id crlf)
+(printout ?writer "multitile," ?id "," ?xmin "," ?xmax "," ?zmin "," ?zmax crlf)
+)
+
+(defrule close-f-writer
+(declare (salience -91))
+?f <- (f-ptr (name ?writer) (mode w) (active TRUE))
+=>
+(close ?writer)
+(modify ?f (active FALSE))
+)
