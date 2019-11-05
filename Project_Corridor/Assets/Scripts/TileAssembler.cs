@@ -25,6 +25,11 @@ namespace MapTiling {
 
         private void Start()
         {
+            StartCoroutine(RunAssemble());
+        }
+
+        IEnumerator RunAssemble()
+        {
             fullAssemblePath = Directory.GetCurrentDirectory() + "\\" + assemblerLocation;
             mapSrcLocation = Directory.GetCurrentDirectory() + "\\" + mapGenFolder + "\\" + srcName;
             mapDstLocation = Directory.GetCurrentDirectory() + "\\" + mapGenFolder + "\\" + dstName;
@@ -32,6 +37,7 @@ namespace MapTiling {
 
             writer.WriteToFile(mapSrcLocation, TileList);
             RunEngineExternal();
+            yield return new WaitForSeconds(1);
             reader.ReadFromFile(mapDstLocation, TileList);
         }
 
