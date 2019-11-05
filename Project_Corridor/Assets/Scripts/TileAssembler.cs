@@ -11,6 +11,9 @@ namespace MapTiling {
         public string engineLocation;
         public string mapGenFolder;
         public TileInputWriter writer;
+        public TileOutputReader reader;
+
+        public List<Tile> TileList;
 
         private string fullAssemblePath;
         private string mapSrcLocation;
@@ -27,8 +30,9 @@ namespace MapTiling {
             mapDstLocation = Directory.GetCurrentDirectory() + "\\" + mapGenFolder + "\\" + dstName;
             engineFullPath = Directory.GetCurrentDirectory() + "\\" + engineLocation;
 
-            writer.WriteToFile(mapSrcLocation);
+            writer.WriteToFile(mapSrcLocation, TileList);
             RunEngineExternal();
+            reader.ReadFromFile(mapDstLocation, TileList);
         }
 
         void RunEngineExternal()
