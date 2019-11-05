@@ -1,0 +1,4 @@
+tile,GOAL,1,2,0,nil,nil,nil,NE
+tile,NE,0,2,1,nil,NS,GOAL,nil
+tile,NS,0,1,0,NE,START,nil,nil
+tile,START,0,0,0,NS,nil,nil,nil
