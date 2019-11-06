@@ -12,9 +12,17 @@ namespace MapTiling {
         {
             foreach(Tile t in tiles)
             {
-                t.transform.position = new Vector3(t.coordinates.x * sideLength.x + Offset.x,
-                                                   Offset.y,
-                                                   t.coordinates.y * sideLength.y + Offset.y);
+                if (t.GridSize.x == 1 && t.GridSize.y == 1)
+                {
+                    t.transform.position = new Vector3(t.coordinates.x * sideLength.x + Offset.x,
+                                                       Offset.y,
+                                                       t.coordinates.y * sideLength.y + Offset.y);
+                    t.transform.Rotate(0, 90 * t.rotations, 0);
+                }
+                else
+                {
+                    Debug.Log("TODO: Implement multitiles");
+                }
             }
         }
     }

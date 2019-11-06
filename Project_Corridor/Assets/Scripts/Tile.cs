@@ -7,8 +7,8 @@ namespace MapTiling
     public enum CardinalDirection
     {
         NORTH,
-        EAST,
         SOUTH,
+        EAST,
         WEST
     }
 

@@ -1,6 +1,9 @@
-tile,backfill-N-gen2,0,2,0,nil,Tile4,nil,nil
-tile,Tile4,0,1,0,backfill-N-gen2,START,Tile3,GOAL
-tile,backfill-N-gen1,1,2,0,nil,Tile3,nil,nil
-tile,Tile3,1,1,0,backfill-N-gen1,nil,nil,Tile4
-tile,GOAL,-1,1,0,nil,nil,Tile4,nil
+tile,Tile5_NW,1,3,0,GOAL,Tile5_SW,Tile5_NE,nil
+tile,GOAL,1,4,1,nil,Tile5_NW,nil,nil
+tile,Tile5_SE,2,2,0,Tile5_NE,nil,nil,Tile5_SW
+tile,Tile5_NE,2,3,0,nil,Tile5_SE,nil,Tile5_NW
+tile,Tile5_SW,1,2,0,Tile5_NW,nil,Tile5_SE,Tile3
+tile,Tile3,0,2,0,nil,Tile4,Tile5_SW,nil
+tile,Tile4,0,1,0,Tile3,START,nil,nil
 tile,START,0,0,0,Tile4,nil,nil,nil
+multitile,Tile5,1,2,2,3

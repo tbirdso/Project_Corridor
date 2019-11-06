@@ -38,7 +38,7 @@ namespace MapTiling {
 
             writer.WriteToFile(mapSrcLocation, TileList);
             RunEngineExternal();
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(0.1f);
             reader.ReadFromFile(mapDstLocation, TileList);
             mover.Move(TileList);
         }
