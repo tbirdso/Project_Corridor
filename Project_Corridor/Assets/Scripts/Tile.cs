@@ -7,8 +7,8 @@ namespace MapTiling
     public enum CardinalDirection
     {
         NORTH,
-        EAST,
         SOUTH,
+        EAST,
         WEST
     }
 
@@ -38,7 +38,7 @@ namespace MapTiling
         public bool assembled;
 
         // Start is called before the first frame update
-        void Start()
+        void Awake()
         {
             EdgeOpenings[CardinalDirection.NORTH] = NorthEdge;
             EdgeOpenings[CardinalDirection.SOUTH] = SouthEdge;
