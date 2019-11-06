@@ -12,6 +12,7 @@ namespace MapTiling {
         public string mapGenFolder;
         public TileInputWriter writer;
         public TileOutputReader reader;
+        public TileMover mover;
 
         public List<Tile> TileList;
 
@@ -39,6 +40,7 @@ namespace MapTiling {
             RunEngineExternal();
             yield return new WaitForSeconds(1);
             reader.ReadFromFile(mapDstLocation, TileList);
+            mover.Move(TileList);
         }
 
         void RunEngineExternal()
