@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace MapTiling {
@@ -59,18 +60,27 @@ namespace MapTiling {
                 failedAssemble = false;
                 TileList = generator.GenerateTiles();
                 writer.WriteToFile(mapSrcLocation, TileList);
+
                 RunEngineExternal();
-                yield return new WaitForSeconds(0.1f);
-                if (!failedAssemble)
+                yield return new WaitForSeconds(0.02f * TileList.Count);
+
+                if (failedAssemble)
                 {
-                    reader.ReadFromFile(mapDstLocation, TileList);
-                    mover.Move(TileList);
-                } else
-                {
-                    foreach(Tile t in TileList)
+                    foreach (Tile t in TileList)
                     {
                         Destroy(t.gameObject);
                     }
+
+                } else
+                {
+                    reader.ReadFromFile(mapDstLocation, TileList);
+                    mover.MoveTile(TileList);
+
+                    GameObject player = GameObject.Find("Player");
+                    Tile StartTile = TileList.Find(t => t.name.ToLower().Equals("start"));
+
+                    mover.MoveToTile(player, StartTile);
+
                 }
             }
         }
