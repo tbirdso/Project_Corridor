@@ -8,7 +8,7 @@ namespace MapTiling {
         public Vector2 sideLength;
         public Vector3 Offset;
 
-        public void Move(List<Tile> tiles)
+        public void MoveTile(List<Tile> tiles)
         {
             foreach(Tile t in tiles)
             {
@@ -17,6 +17,13 @@ namespace MapTiling {
                                                     t.coordinates.y * sideLength.y + Offset.y);
                 t.transform.Rotate(0, 90 * t.rotations, 0);
             }
+        }
+
+        public void MoveToTile(GameObject obj, Tile t)
+        {
+            Vector3 destPos = t.transform.position;
+            destPos.y += 0.5f * t.transform.localScale.y;
+            obj.transform.position = destPos;
         }
     }
 }
