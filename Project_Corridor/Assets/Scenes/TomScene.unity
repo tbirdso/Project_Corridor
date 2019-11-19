@@ -153,7 +153,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 447954, guid: dc06161b6d97feb419f45f03b62e14b9, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 447954, guid: dc06161b6d97feb419f45f03b62e14b9, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -280,7 +280,7 @@ MonoBehaviour:
   NumTiles: 20
   StartPrefab: {fileID: 7834376257374113893, guid: 160fa0eeae290c0419d037d8abc9a1ab,
     type: 3}
-  GoalPrefab: {fileID: 4761940792772058146, guid: 402f6723d8fdc934aa02298438a887f0,
+  GoalPrefab: {fileID: 9115374950438922430, guid: 402f6723d8fdc934aa02298438a887f0,
     type: 3}
   Prefabs:
   - {fileID: 8114643198710179301, guid: bbf32a2aba17110438953d18acafee74, type: 3}
@@ -410,7 +410,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 475244, guid: 7a135b1a2cb9c8f488d4dd00c55ab283, type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 475244, guid: 7a135b1a2cb9c8f488d4dd00c55ab283, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
