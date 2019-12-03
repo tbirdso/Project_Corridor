@@ -35,6 +35,9 @@ namespace BossRoomTiling
         public Vector3 origin;
         // Displacement between tiles
         public Vector2 delta;
+
+        // Map selector (-1 for random)
+        public int mapId;
         #endregion
 
         #region Private Members
@@ -55,7 +58,8 @@ namespace BossRoomTiling
             string bossFile;
             List<BossTile> colors;
 
-            int randNum = (int)UnityEngine.Random.Range(0.0f, 1.0f);
+            int randNum = (mapId == -1) ? (int)UnityEngine.Random.Range(0.0f, 10.0f) : mapId;
+            Debug.Log("Loading map" + randNum.ToString("D2"));
             bossFile = Directory.GetCurrentDirectory() + "\\" + bossFolder + "\\map" + randNum.ToString("D2") + ".txt";
 
             colors = reader.ReadFromFile(bossFile);
