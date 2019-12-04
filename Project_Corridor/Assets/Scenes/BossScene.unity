@@ -165,7 +165,7 @@ MonoBehaviour:
     type: 3}
   blueVariant: {fileID: 482158257699891495, guid: f8a403360f6a4bc42ac78dde6b8dc10d,
     type: 3}
-  origin: {x: 0, y: 0, z: 0}
+  origin: {x: -4.5, y: 0, z: -4.5}
   delta: {x: 1, y: 1}
   mapId: -1
 --- !u!4 &337128343
@@ -325,7 +325,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 447954, guid: dc06161b6d97feb419f45f03b62e14b9, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3.9
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 447954, guid: dc06161b6d97feb419f45f03b62e14b9, type: 3}
       propertyPath: m_LocalPosition.y
@@ -333,7 +333,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 447954, guid: dc06161b6d97feb419f45f03b62e14b9, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 4.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 447954, guid: dc06161b6d97feb419f45f03b62e14b9, type: 3}
       propertyPath: m_LocalRotation.x
