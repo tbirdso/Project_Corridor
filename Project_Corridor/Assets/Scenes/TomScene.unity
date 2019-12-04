@@ -202,7 +202,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bb4814733912244eb0556a40687bc7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BackfillPrefab: {fileID: 9039915523746288610, guid: 239c5295814ed914d92fc032bcbf8068,
+  BackfillPrefab: {fileID: 5749559733361665393, guid: 999b2e29a61f3ea44b9726a47512e991,
     type: 3}
 --- !u!114 &915087088
 MonoBehaviour:
@@ -278,28 +278,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   NumTiles: 20
-  StartPrefab: {fileID: 7834376257374113893, guid: 160fa0eeae290c0419d037d8abc9a1ab,
+  StartPrefab: {fileID: 4174012392386426518, guid: 4537434866b9ae3488b5b7a7c4ba58eb,
     type: 3}
-  GoalPrefab: {fileID: 9115374950438922430, guid: 402f6723d8fdc934aa02298438a887f0,
+  GoalPrefab: {fileID: 2976737220806880537, guid: 253b2b707f15e69438e38c07044d73f6,
     type: 3}
   Prefabs:
-  - {fileID: 8114643198710179301, guid: bbf32a2aba17110438953d18acafee74, type: 3}
-  - {fileID: 1225514413710844244, guid: 040e4c9bb0db11c4592accac56a2bb77, type: 3}
-  - {fileID: 8951461914148819446, guid: 4f1821aa4dd35a14ca29ad99535d8ed2, type: 3}
-  - {fileID: 1672146664917795417, guid: dfa7babae84621e4da4fb0d795d789cb, type: 3}
-  - {fileID: 2664773547703701240, guid: 6bd1fd2523dd5a34596272acbf6bfe02, type: 3}
-  - {fileID: 1248173011780100701, guid: a01e6619dfd5e9d449a6220a2f66993e, type: 3}
-  - {fileID: 4705600735962651023, guid: dab0247af8721ae4898ff7bf4d28c47f, type: 3}
-  - {fileID: 1322243619160660844, guid: 8ce34951b0c14f94d80008c36491d994, type: 3}
+  - {fileID: 9101439773795224340, guid: c203767541ece014ea0db5d00753ac91, type: 3}
+  - {fileID: 114346854480046780, guid: 49a2f9994f2119148995fedc26b19f2a, type: 3}
+  - {fileID: 8937074811830925555, guid: b56fbb983c967a24abb722f413255db2, type: 3}
+  - {fileID: 5749559733361665393, guid: 999b2e29a61f3ea44b9726a47512e991, type: 3}
+  - {fileID: 8788552558096577724, guid: 86062b182a1eae04bbf54999a4f4339f, type: 3}
+  - {fileID: 8502812086638967441, guid: f6d975698e388bb48926b822b7ef87c0, type: 3}
+  - {fileID: 5828335102412756509, guid: 3ef21529c715f2542aee2e3c62a892ca, type: 3}
+  - {fileID: 3875696198498164254, guid: 332f62630933fd34f9cb3425b150b62a, type: 3}
   Weights:
-  - 0.1
-  - 0.1
-  - 0.1
+  - 0.3
   - 0.2
   - 0.1
   - 0.1
-  - 0.2
-  - 0.1
+  - 0.15
+  - 0.05
+  - 0.05
+  - 0.05
 --- !u!1 &1105025908
 GameObject:
   m_ObjectHideFlags: 0
