@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 334379462182142889}
   - component: {fileID: 1738316695695457866}
   - component: {fileID: 1443100115785000445}
+  - component: {fileID: 418830290050968809}
   m_Layer: 0
   m_Name: TeleportPad
   m_TagString: Untagged
@@ -105,6 +106,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneToTransition: BossScene
+--- !u!114 &418830290050968809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3153401951721061769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc3be917a80086a48b97933694257f09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4005350376042714350
 GameObject:
   m_ObjectHideFlags: 0
@@ -4089,6 +4102,7 @@ GameObject:
   - component: {fileID: 7987657162851360270}
   - component: {fileID: 3854556696220256813}
   - component: {fileID: 7809296049408735770}
+  - component: {fileID: 8436386155110611134}
   m_Layer: 0
   m_Name: TeleportPad (1)
   m_TagString: Untagged
@@ -4181,6 +4195,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneToTransition: TomScene
+--- !u!114 &8436386155110611134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8571125409943835355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc3be917a80086a48b97933694257f09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8709758826925371446
 GameObject:
   m_ObjectHideFlags: 0

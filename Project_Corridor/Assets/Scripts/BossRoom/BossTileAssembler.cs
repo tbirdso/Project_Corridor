@@ -17,6 +17,7 @@ namespace BossRoomTiling
         #endregion
 
         #region Public Members
+
         // Relative path to folder containing boss room CSV files
         public string bossFolder;
 
@@ -37,7 +38,7 @@ namespace BossRoomTiling
         public Vector2 delta;
 
         // Map selector (-1 for random)
-        public int mapId;
+        private int mapId;
         #endregion
 
         #region Private Members
@@ -50,6 +51,13 @@ namespace BossRoomTiling
         public void Start()
         {
             AssembleMap();
+
+            // TODO: dynamically place player
+            foreach(GameObject player in GameObject.FindGameObjectsWithTag("Player"))
+            {
+                player.transform.position = new Vector3(0, 0, 0);
+            }
+
         }
 
         #region Private Methods
