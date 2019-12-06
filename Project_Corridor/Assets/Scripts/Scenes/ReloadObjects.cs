@@ -4,15 +4,19 @@ using UnityEngine;
 
 public class ReloadObjects : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public string UniqueTag;
 
     // Update is called once per frame
     void Update()
     {
-        
+        GameObject[] objects;
+        if((objects = GameObject.FindGameObjectsWithTag(UniqueTag)).Length > 1)
+        {
+            // Remove duplicate player objects
+            for(int i = 1; i < objects.Length; i++)
+            {
+                Destroy(objects[i]);
+            }
+        }
     }
 }
